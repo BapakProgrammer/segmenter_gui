@@ -1,5 +1,12 @@
 .env
 .venv
+
+## excelude SAM3 related assets
 /assets/*
+
+## exclude pycharm setting
 .idea/*
 .idea
+
+## exclude sensitive datasets
+.dataset/tumtraf
