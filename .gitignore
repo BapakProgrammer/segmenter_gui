@@ -9,4 +9,8 @@
 .idea
 
 ## exclude sensitive datasets
-.dataset/tumtraf
+.dataset/*
+dataset/tumtraf
+
+## exclude SAM3 repo
+./sam3

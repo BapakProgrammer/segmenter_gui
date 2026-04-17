@@ -1,23 +1,21 @@
 import warnings
 warnings.filterwarnings("ignore")
-
-import torch
-from safetensors.torch import load_file
-from sam3.model_builder import build_sam3_image_model
-from sam3.model.sam3_image_processor import Sam3Processor
-
+from segmenter_gui.src.utils import load_config
+from segmenter_gui.src.utils import segmenter_model, image_processing
 import time
 
-start_time = time.time()
-model = build_sam3_image_model(
-                           bpe_path= "./sam3/assets/bpe_simple_vocab_16e6.txt.gz",
-                           device= "cuda" if torch.cuda.is_available() else "cpu",
-                           eval_mode = True,
-                           checkpoint_path = "./assets/sam3.pt",
-                           load_from_HF = False,
-                           enable_inst_interactivity = False,
-                           )
-end_time = time.time()
-print(f'Time taken: {end_time - start_time} s')
+CONFIG = load_config()
+SEGMENTER = segmenter_model(CONFIG, model_name="sam3")
+segmenter_model = SEGMENTER.build_model()
 
-processor = Sam3Processor(model)
+image_processor = image_processing(CONFIG)
+
+image = image_processor.load_image(
+    image_path=CONFIG["images"]["dummy_path"],
+    tobe_resized=False,
+)
+
+masks, boxes, scores = SEGMENTER.image_inference(
+    image=image, text_prompt="car", segmenter=segmenter_model
+)
+
