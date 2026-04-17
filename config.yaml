@@ -8,4 +8,4 @@ sam3:
   default_size: 1008
 
 images:
-  dummy_path: './dataset/tumtraf/1611481831_238000000_s40_camera_basler_north_50mm.jpg'
+  dummy_path: './dataset/tumtraf/1611481871_132000000_s50_camera_basler_south_50mm.jpg'

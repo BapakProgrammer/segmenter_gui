@@ -31,9 +31,16 @@ def test_torch():
 class image_processing():
     def __init__(self, CONFIG):
         self.CONFIG = CONFIG
+        self.org_image = None
+        self.filename = None
+        self.alpha = 1
+        self.beta = 0.65
+        self.preview_scale=0.7
+
 
     def load_image(self, image_path:str, tobe_resized:bool=False) :
         image =cv2.imread(image_path)
+        self.org_image = image.copy()
         assert image is not None
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         if tobe_resized:
@@ -41,6 +48,36 @@ class image_processing():
                 (self.CONFIG["sam3"]["default_size"], self.CONFIG["sam3"]["default_size"])
             )
         return image
+
+    def merge_all_mask(self, nchw_array:np.ndarray) -> np.ndarray:
+        nhw_array = np.squeeze(nchw_array, axis=1)
+        hw_array= np.any(nhw_array, axis=0).astype(bool)
+        return hw_array
+
+    def visualize_mask(self, mask:np.ndarray, is_gui:bool=False):
+        anns_color = np.random.randint(0, 255, size=3)
+        background = np.ones_like(self.org_image)
+        merge_mask = self.merge_all_mask(mask)
+        background[merge_mask] = anns_color
+
+        if is_gui:
+            vis = cv2.addWeighted(self.org_image,
+                                  self.alpha,
+                                  background,
+                                  self.beta, 0)
+
+            vis = cv2.resize(vis, None,
+                             fx=self.preview_scale,
+                             fy=self.preview_scale,
+                             interpolation=cv2.INTER_LANCZOS4)
+
+            cv2.imshow("vis", vis)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+
+
+
+
 
 class segmenter_model:
     def __init__(self, CONFIG, model_name:str):
@@ -83,13 +120,16 @@ class segmenter_model:
                         segmenter,
                         to_cpu:bool=False):
         inference_state = segmenter.set_image(image)
-
+        start = time.time()
         with torch.no_grad():
             output = segmenter.set_text_prompt(
                 state=inference_state, prompt=text_prompt
             )
+        end = time.time()
+        print("")
+        print(f"-------- Inference finished in {(end - start) * 1000:.2f} ms")
         print(f"prompt '{text_prompt}' found {len(output["scores"])} object(s)")
-
+        print(f"")
         if to_cpu:
             return output["masks"].cpu().numpy(), output["boxes"].cpu().numpy(), output["scores"].cpu().numpy()
         else:

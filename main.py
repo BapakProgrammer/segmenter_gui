@@ -19,4 +19,4 @@ masks, boxes, scores = SEGMENTER.image_inference(
     image=image, text_prompt="road", segmenter=segmenter_model, to_cpu=True
 )
 
-print(masks.shape)
+image_processor.visualize_mask(masks, is_gui=True)
