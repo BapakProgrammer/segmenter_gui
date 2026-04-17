@@ -80,7 +80,8 @@ class segmenter_model:
     def image_inference(self,
                         image:np.ndarray,
                         text_prompt:str,
-                        segmenter):
+                        segmenter,
+                        to_cpu:bool=False):
         inference_state = segmenter.set_image(image)
 
         with torch.no_grad():
@@ -88,7 +89,11 @@ class segmenter_model:
                 state=inference_state, prompt=text_prompt
             )
         print(f"prompt '{text_prompt}' found {len(output["scores"])} object(s)")
-        return output["masks"], output["boxes"], output["scores"]
+
+        if to_cpu:
+            return output["masks"].cpu().numpy(), output["boxes"].cpu().numpy(), output["scores"].cpu().numpy()
+        else:
+            return output["masks"], output["boxes"], output["scores"]
 
 
 

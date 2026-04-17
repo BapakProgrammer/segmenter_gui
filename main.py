@@ -14,8 +14,9 @@ image = image_processor.load_image(
     image_path=CONFIG["images"]["dummy_path"],
     tobe_resized=False,
 )
-
+print("im_array ", image.shape)
 masks, boxes, scores = SEGMENTER.image_inference(
-    image=image, text_prompt="car", segmenter=segmenter_model
+    image=image, text_prompt="road", segmenter=segmenter_model, to_cpu=True
 )
 
+print(masks.shape)
